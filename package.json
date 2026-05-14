@@ -1,0 +1,28 @@
+{
+  "name": "thepitwall---inst377-final-project",
+  "version": "1.0.0",
+  "description": "Inst377 - Final Project - ThePitwall",
+  "homepage": "https://github.com/AaronAtayan310/ThePitwall---Inst377-Final-Project#readme",
+  "bugs": {
+    "url": "https://github.com/AaronAtayan310/ThePitwall---Inst377-Final-Project/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AaronAtayan310/ThePitwall---Inst377-Final-Project.git"
+  },
+  "license": "ISC",
+  "author": "Aaron Atayan",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon -e '*'",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4",
+    "body-parser": "^2.2.2",
+    "express": "^5.2.1",
+    "nodemon": "^3.1.14",
+    "usa-state-validator": "^1.0.6"
+  }
+}

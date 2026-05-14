@@ -1,0 +1,143 @@
+<html>
+    <head>
+        <title>Inst377 Final Project - ThePitwall</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="HomePageCSS.css">
+    </head>
+    <body>
+        <!-- ── NAV ─────────────────────────────────────────── -->
+        <nav>
+            <div class="nav-logo" onclick="showPage('home')">
+            <div class="nav-logo-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 17h4l1-5H5l-2 5zm6 0h3l1-9H9l1 9zm5 0h3l2-13h-3l-2 13z"/>
+                </svg>
+            </div>
+            <span class="nav-logo-text">The<span>Pitwall</span></span>
+            </div>
+
+            <ul class="nav-links">
+                <li><a href="PitHome.html" class="active-link">Home</a></li>
+                <li><a href="PitSchedule.html" class="nav-cta">Schedule</a></li>
+                <li><a href="PitDrivers.html" class="nav-cta">Drivers</a></li>
+                <li><a href="PitLiveTiming.html" class="nav-cta">Live Timing</a></li>
+                <li><a href="PitTelemetry.html" class="nav-cta">Telemetry</a></li>
+                <li><a href="PitStrat.html" class="nav-cta">Pit Strategy</a></li>
+                <li><a href="PitAbout.html" class="nav-cta">About</a></li>
+            </ul>
+        </nav>
+
+        <!-- HOME PAGE -->
+        <div id="page-home" class="page active">
+
+            <section class="hero">
+            <div class="hero-bg"></div>
+            <div class="hero-watermark">F1</div>
+
+            <div class="hero-content">
+                <div class="hero-eyebrow anim-1">
+                <span class="live-badge"><span class="live-dot"></span>Live Data</span>
+                Your F1 command center
+                </div>
+
+                <h1 class="hero-title anim-2">
+                The
+                <span class="accent">Pitwall</span>
+                </h1>
+
+                <p class="hero-subtitle anim-3">
+                Real-time lap times, telemetry, pit strategies, and championship data—
+                everything happening on track, at a glance. Built for fans who want more
+                than the highlight reel.
+                </p>
+
+                <div class="hero-cards anim-4">
+                <a class="hero-card" href="#" onclick="return false;" title="Race Schedule">
+                    <span class="hero-card-icon">🗓️</span>
+                    <span class="hero-card-label">Season</span>
+                    <span class="hero-card-title">Race Schedule</span>
+                    <span class="card-arrow">→</span>
+                </a>
+                <a class="hero-card" href="#" onclick="return false;" title="Drivers">
+                    <span class="hero-card-icon">🪖</span>
+                    <span class="hero-card-label">Grid</span>
+                    <span class="hero-card-title">Drivers</span>
+                    <span class="card-arrow">→</span>
+                </a>
+                <a class="hero-card" href="#" onclick="return false;" title="Live Timing">
+                    <span class="hero-card-icon">⏱</span>
+                    <span class="hero-card-label">Live</span>
+                    <span class="hero-card-title">Lap Times &amp; Leaderboard</span>
+                    <span class="card-arrow">→</span>
+                </a>
+                <a class="hero-card" href="#" onclick="return false;" title="Telemetry">
+                    <span class="hero-card-icon">📡</span>
+                    <span class="hero-card-label">Data</span>
+                    <span class="hero-card-title">Car Telemetry</span>
+                    <span class="card-arrow">→</span>
+                </a>
+                <a class="hero-card" href="#" onclick="return false;" title="Pit Strategy">
+                    <span class="hero-card-icon">🔧</span>
+                    <span class="hero-card-label">Strategy</span>
+                    <span class="hero-card-title">Pit Stops</span>
+                    <span class="card-arrow">→</span>
+                </a>
+                </div>
+            </div>
+
+            <div class="hero-bottom anim-5">
+                <div class="hero-stat">
+                <div class="hero-stat-value">24</div>
+                <div class="hero-stat-label">Races This Season</div>
+                </div>
+                <div class="hero-bottom-divider"></div>
+                <div class="hero-stat">
+                <div class="hero-stat-value">20</div>
+                <div class="hero-stat-label">Drivers on the Grid</div>
+                </div>
+                <div class="hero-bottom-divider"></div>
+                <div class="hero-stat">
+                <div class="hero-stat-value">10</div>
+                <div class="hero-stat-label">Constructor Teams</div>
+                </div>
+                <div class="hero-bottom-divider"></div>
+                <div class="hero-stat">
+                <div class="hero-stat-value">5</div>
+                <div class="hero-stat-label">Continents Visited</div>
+                </div>
+            </div>
+            </section>
+
+            <footer>
+            <div class="footer-logo">The<span>Pitwall</span></div>
+            <div class="footer-note">Data via OpenF1 API &mdash; INST377 Final Project &mdash; Aaron Atayan</div>
+            </footer>
+        </div>
+
+        <script>
+            function showPage(name) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + name).classList.add('active');
+
+            document.querySelectorAll('.nav-links a, .nav-links button').forEach(el => {
+                el.classList.remove('active-link');
+            });
+
+            const btn = document.getElementById('nav-' + name);
+            if (btn) btn.classList.add('active-link');
+
+            window.scrollTo({ top: 0 });
+
+            // re-trigger animations
+            const page = document.getElementById('page-' + name);
+            page.querySelectorAll('[class*="anim-"]').forEach(el => {
+                el.style.animation = 'none';
+                void el.offsetWidth;
+                el.style.animation = '';
+            });
+            }
+        </script>
+    </body>
+</html>

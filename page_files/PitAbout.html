@@ -1,0 +1,147 @@
+<html>
+    <head>
+        <title>Inst377 Final Project - ThePitwall</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="HomePageCSS.css">
+    </head>
+    <body>
+        <!-- ABOUT PAGE -->
+        <div id="page-about" class="page active">
+
+            <section class="about-hero">
+                <div class="about-hero-bg"></div>
+                <div class="about-hero-stripe"></div>
+                <div class="about-hero-content">
+                    <div class="about-eyebrow anim-1">About the project</div>
+                    <h1 class="about-title anim-2">The<br>Pitwall</h1>
+                </div>
+            </section>
+
+            <div class="about-body">
+
+                <div class="about-grid anim-2">
+                    <div class="about-lead">
+                        <p style="margin-bottom:1rem;">
+                            <strong>Formula 1</strong>, or F1 for short, is the pinnacle of motorsport. 
+                            With over 20 races in 21 countries spread across five continents in just one single year, 
+                            it can be difficult to keep track of the statistics, news, and on-track drama of the fastest people in the world, 
+                            especially for casual fans of the sport and those who simply are unable to tune in to race weekends. 
+                            To solve this problem, I have created <strong>The Pitwall</strong>. 
+                        </p>
+                        <p>
+                            The Pitwall provides fans with live and up to date information and news all about F1.
+                            The sites name references the <strong>pitwall</strong>, which is the trackside command center where
+                            engineers and strategists of each team monitor every sensor on the car and make real-time calls that
+                            decide the outcome of a race. That same data is now on your browser!
+                    </p>
+                    </div>
+
+                    <div class="about-aside anim-3">
+                        <p>
+                            ThePitwall was created for INST377: Dynamic Web Applications at the University of Maryland.
+                            It uses the <strong>OpenF1 API</strong> to pull live and historical session data, caches
+                            it in <strong>Supabase</strong> to stay within rate limits, and serves it through a
+                            <strong>Node/Express</strong> backend deployed on Vercel.
+                        </p>
+                        <p>
+                            <em style="color: var(--silver); font-style: italic;">Built by Aaron Atayan — Spring 2026</em>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="anim-3">
+                <div class="features-heading">What you can do</div>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-num">01</div>
+                        <div class="feature-title">Race Schedule</div>
+                        <div class="feature-desc">Browse the full season calendar—every Grand Prix weekend with session breakdowns, circuits, and local times.</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-num">02</div>
+                        <div class="feature-title">Driver Profiles</div>
+                        <div class="feature-desc">See every driver on the grid: number, team, nationality, and headshot pulled directly from OpenF1.</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-num">03</div>
+                        <div class="feature-title">Live Lap Times</div>
+                        <div class="feature-desc">Live leaderboard with per-driver sector times, current tyre compound, and time gaps to the leader.</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-num">04</div>
+                        <div class="feature-title">Car Telemetry</div>
+                        <div class="feature-desc">Real-time gear selection, DRS status, brake traces, and speed data for any driver in any session.</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-num">05</div>
+                        <div class="feature-title">Pit Strategy</div>
+                        <div class="feature-desc">Track all pit stops—lap numbers, stop durations, tyre compounds—for every car throughout the race.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tech-section anim-4">
+                <div class="features-heading">Tech stack</div>
+                <div class="tech-grid">
+                    <div class="tech-pill">
+                        <span class="tech-dot frontend"></span>
+                        <div>
+                        <div class="tech-pill-label">React + Vite</div>
+                        <div class="tech-pill-sub">Frontend</div>
+                        </div>
+                    </div>
+                    <div class="tech-pill">
+                        <span class="tech-dot frontend"></span>
+                        <div>
+                        <div class="tech-pill-label">Chart.js</div>
+                        <div class="tech-pill-sub">Data Visualization</div>
+                        </div>
+                    </div>
+                    <div class="tech-pill">
+                        <span class="tech-dot backend"></span>
+                        <div>
+                        <div class="tech-pill-label">Node + Express</div>
+                        <div class="tech-pill-sub">Backend</div>
+                        </div>
+                    </div>
+                    <div class="tech-pill">
+                        <span class="tech-dot db"></span>
+                        <div>
+                            <div class="tech-pill-label">Supabase</div>
+                            <div class="tech-pill-sub">Cache + Database</div>
+                        </div>
+                    </div>
+                    <div class="tech-pill">
+                        <span class="tech-dot data"></span>
+                        <div>
+                        <div class="tech-pill-label">OpenF1 API</div>
+                        <div class="tech-pill-sub">F1 Live Data</div>
+                        </div>
+                    </div>
+                <div class="tech-pill">
+                    <span class="tech-dot backend"></span>
+                    <div>
+                        <div class="tech-pill-label">Vercel</div>
+                        <div class="tech-pill-sub">Deployment</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-cta anim-5">
+                <div class="about-cta-text">
+                    <h3>Ready to go trackside?</h3>
+                    <p>Jump to the live timing board or explore the race calendar.</p>
+                </div>
+                <a href="PitHome.html" class="btn-primary">← Back to Home</a>
+            </div>
+
+            <footer>
+                <div class="footer-logo">The<span>Pitwall</span></div>
+                <div class="footer-note">Data via OpenF1 API &mdash; INST377 Final Project &mdash; Aaron Atayan</div>
+            </footer>
+        </div>
+    </body>
+</html>

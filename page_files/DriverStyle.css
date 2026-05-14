@@ -1,0 +1,468 @@
+/* ── PAGE HEADER ─────────────────────────────────── */
+.drivers-hero {
+    padding-top: 64px;
+    min-height: 28vh;
+    display: flex;
+    align-items: flex-end;
+    position: relative;
+    overflow: hidden;
+    background: var(--carbon-2);
+    border-bottom: 1px solid rgba(232, 0, 45, 0.2);
+}
+
+.drivers-hero-bg {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 80px,
+        rgba(255, 255, 255, 0.015) 80px,
+        rgba(255, 255, 255, 0.015) 81px
+    );
+}
+
+.drivers-hero-stripe {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+        to right,
+        var(--red) 0%,
+        var(--red-dark) 60%,
+        transparent 100%
+    );
+}
+
+.drivers-hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 2.5rem 3rem 2rem;
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.page-eyebrow {
+    font-family: var(--font-cond);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.page-eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: var(--red);
+}
+
+.page-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+}
+
+/* ── SEASON SELECTOR ─────────────────────────────── */
+.season-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.season-selector label {
+    font-family: var(--font-cond);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--silver-2);
+}
+
+.season-selector select {
+    font-family: var(--font-cond);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    background: var(--carbon-3);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    transition: border-color 0.18s;
+}
+
+.season-selector select:hover,
+.season-selector select:focus {
+    border-color: var(--red);
+}
+
+/* ── MAIN LAYOUT ─────────────────────────────────── */
+.drivers-body {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2.5rem 3rem 4rem;
+}
+
+/* ── STATS BAR ───────────────────────────────────── */
+.stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+}
+
+.stat-cell {
+    background: var(--carbon-2);
+    padding: 1.1rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.stat-cell-value {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    color: var(--white);
+    line-height: 1;
+}
+
+.stat-cell-label {
+    font-family: var(--font-cond);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--silver-2);
+}
+
+/* ── SECTION LABEL ───────────────────────────────── */
+.section-label {
+    font-family: var(--font-cond);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--red);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.section-label::before {
+    content: '';
+    display: inline-block;
+    width: 28px;
+    height: 2px;
+    background: var(--red);
+}
+
+/* ── CHART SECTION ───────────────────────────────── */
+.chart-section {
+    margin-bottom: 3rem;
+}
+
+.chart-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.chart-card {
+    background: var(--carbon-2);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    padding: 1.5rem;
+}
+
+.chart-card-title {
+    font-family: var(--font-cond);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--silver);
+    margin-bottom: 1.2rem;
+}
+
+.chart-wrapper {
+    position: relative;
+    height: 220px;
+}
+
+/* ── FILTER BAR ──────────────────────────────────── */
+.filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    font-family: var(--font-cond);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    background: var(--carbon-3);
+    color: var(--silver-2);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 3px;
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.filter-btn:hover {
+    color: var(--white);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.filter-btn.active {
+    background: var(--red);
+    color: var(--white);
+    border-color: var(--red);
+}
+
+.search-box {
+    margin-left: auto;
+    font-family: var(--font-cond);
+    font-size: 0.85rem;
+    background: var(--carbon-3);
+    color: var(--white);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 3px;
+    padding: 0.35rem 0.9rem;
+    outline: none;
+    width: 200px;
+    transition: border-color 0.18s;
+}
+
+.search-box::placeholder {
+    color: var(--silver-2);
+}
+
+.search-box:focus {
+    border-color: var(--red);
+}
+
+/* ── DRIVER TABLE ────────────────────────────────── */
+.driver-table-section {
+    margin-bottom: 3rem;
+}
+
+.driver-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+.driver-table thead tr {
+    border-bottom: 2px solid var(--red);
+}
+
+.driver-table th {
+    font-family: var(--font-cond);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--silver-2);
+    padding: 0.6rem 1rem;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.driver-table th.num-col {
+    text-align: center;
+    width: 60px;
+}
+
+.driver-table tbody tr {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    transition: background 0.14s;
+    cursor: default;
+    animation: rowIn 0.3s ease both;
+}
+
+.driver-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.driver-table td {
+    padding: 0.75rem 1rem;
+    color: var(--silver);
+    vertical-align: middle;
+}
+
+.driver-table td.num-col {
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    color: var(--white);
+}
+
+/* ── DRIVER NAME CELL ────────────────────────────── */
+.driver-name-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+
+.driver-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--carbon-4);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+}
+
+.driver-avatar-placeholder {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--carbon-4);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    color: var(--silver-2);
+    flex-shrink: 0;
+}
+
+.driver-full-name {
+    font-family: var(--font-cond);
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--white);
+}
+
+.driver-abbr {
+    font-size: 0.75rem;
+    color: var(--silver-2);
+    margin-top: 1px;
+    letter-spacing: 0.08em;
+}
+
+/* ── TEAM CELL ───────────────────────────────────── */
+.team-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.team-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* ── FLAG ────────────────────────────────────────── */
+.flag {
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* ── LOADING / ERROR STATES ──────────────────────── */
+.state-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    gap: 1rem;
+    color: var(--silver-2);
+}
+
+.state-box .state-icon {
+    font-size: 2.5rem;
+    opacity: 0.4;
+}
+
+.state-box p {
+    font-family: var(--font-cond);
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255, 255, 255, 0.08);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+/* ── ANIMATIONS ──────────────────────────────────── */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rowIn {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media (max-width: 900px) {
+    .drivers-body {
+        padding: 2rem 1.5rem;
+    }
+
+    .chart-row {
+        grid-template-columns: 1fr;
+    }
+
+    .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .drivers-hero-content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .driver-table th:nth-child(5),
+    .driver-table td:nth-child(5) {
+        display: none;
+    }
+}

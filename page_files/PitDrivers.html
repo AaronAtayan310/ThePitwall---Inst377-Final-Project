@@ -1,0 +1,233 @@
+<html>
+    <head>
+        <title>Drivers — ThePitwall</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="HomePageCSS.css">
+        <link rel="stylesheet" href="DriverStyle.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    </head>
+    <body>
+        <nav>
+            <a class="nav-logo" href="PitHome.html">
+                <span class="nav-logo-text">The<span>Pitwall</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="PitHome.html">Home</a></li>
+                <li><a href="#">Schedule</a></li>
+                <li><a href="PitDrivers.html" class="active-link">Drivers</a></li>
+                <li><a href="#">Live Timing</a></li>
+                <li><a href="#">Telemetry</a></li>
+                <li><a href="#">Pit Strategy</a></li>
+                <li><a href="PitAbout.html" class="nav-cta">About</a></li>
+            </ul>
+        </nav>
+
+        <section class="drivers-hero">
+            <div class="drivers-hero-bg"></div>
+            <div class="drivers-hero-stripe"></div>
+            <div class="drivers-hero-content">
+                <div>
+                    <div class="page-eyebrow">The Grid</div>
+                    <h1 class="page-title" id="main-title">2025 Drivers</h1>
+                </div>
+                <div class="season-selector">
+                    <label for="season-select">Season</label>
+                    <select id="season-select">
+                        <option value="2025" selected>2025 Season</option>
+                        <option value="2024">2024 Season</option>
+                        <option value="2023">2023 Season</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <div class="drivers-body">
+
+            <div class="stats-bar" id="stats-bar">
+                <div class="stat-cell">
+                    <div class="stat-cell-value" id="stat-total-drivers">0</div>
+                    <div class="stat-cell-label">Total Drivers</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="stat-cell-value" id="stat-total-teams">0</div>
+                    <div class="stat-cell-label">Teams</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="stat-cell-value" id="stat-nations">0</div>
+                    <div class="stat-cell-label">Nationalities</div>
+                </div>
+                <div class="stat-cell">
+                    <div class="stat-cell-value" id="stat-season">2025</div>
+                    <div class="stat-cell-label">Season</div>
+                </div>
+            </div>
+
+            <div class="driver-table-section">
+                <div class="section-label">All Drivers</div>
+
+                <div class="filter-bar">
+                    <input
+                        class="search-box"
+                        id="driver-search"
+                        type="text"
+                        placeholder="Search driver name or number..."
+                    />
+                </div>
+
+                <div id="table-container">
+                    <div class="state-box">
+                        <div class="spinner"></div>
+                        <p>Loading drivers…</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="footer-logo">The<span>Pitwall</span></div>
+            <div class="footer-note">Data via OpenF1 API &mdash; INST377 Final Project &mdash; Aaron Atayan</div>
+        </footer>
+
+        <script>
+            // 1. Setup global data storage
+            let allDrivers = [];
+            let searchQuery = '';
+
+            // 2. Map years to specific session keys
+            const sessionMap = {
+                "2025": 9640, 
+                "2024": 9468, 
+                "2023": 9158, 
+            };
+
+            // 3. The Fetch Function
+            async function loadDrivers(year) {
+                showLoading();
+                
+                // Update UI Labels immediately
+                document.getElementById('main-title').innerText = `${year} Drivers`;
+                document.getElementById('stat-season').innerText = year;
+
+                const sessionKey = sessionMap[year] || 9640;
+                const url = `https://api.openf1.org/v1/drivers?session_key=${sessionKey}`;
+
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+
+                    if (!data || data.length === 0) {
+                        showError(`No data found for the ${year} season.`);
+                        return;
+                    }
+
+                    // Filter duplicates (API returns one entry per driver per session record)
+                    allDrivers = data.filter((v, i, a) => 
+                        a.findIndex(t => (t.driver_number === v.driver_number)) === i
+                    );
+
+                    // ── UPDATE THE STATS BAR ──
+                    const driverCount = allDrivers.length;
+                    const teamCount = new Set(allDrivers.map(d => d.team_name)).size;
+                    const nationCount = new Set(allDrivers.map(d => d.country_code).filter(c => c)).size;
+
+                    document.getElementById('stat-total-drivers').innerText = driverCount;
+                    document.getElementById('stat-total-teams').innerText = teamCount;
+                    document.getElementById('stat-nations').innerText = nationCount || "—";
+
+                    renderTable();
+
+                } catch (err) {
+                    console.error("API Error:", err);
+                    showError("The Pitwall is offline. Connection to FIA servers failed.");
+                }
+            }
+
+            // 4. The Render Function
+            function renderTable() {
+                const container = document.getElementById('table-container');
+                
+                // Filter based on search input
+                const filtered = allDrivers.filter(d => 
+                    d.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    d.driver_number.toString().includes(searchQuery)
+                );
+
+                if (filtered.length === 0) {
+                    container.innerHTML = '<div class="state-box"><p>No drivers found on the radar.</p></div>';
+                    return;
+                }
+
+                let rows = filtered.map(d => `
+                    <tr>
+                        <td class="num-col">${d.driver_number}</td>
+                        <td>
+                            <div class="driver-name-cell">
+                                <img src="${d.headshot_url}" class="driver-avatar" onerror="this.src='https://www.formula1.com/etc/designs/fom-website/images/svg/f1-logo.svg'">
+                                <div class="driver-full-name">${d.full_name}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="team-cell">
+                                <span class="team-dot" style="background-color: #${d.team_colour || 'FFFFFF'}"></span>
+                                ${d.team_name}
+                            </div>
+                        </td>
+                        <td>${d.country_code || '🏁 TBD'}</td>
+                        <td class="driver-abbr">${d.name_acronym}</td>
+                    </tr>
+                `).join('');
+
+                container.innerHTML = `
+                    <table class="driver-table">
+                        <thead>
+                            <tr>
+                                <th class="num-col">#</th>
+                                <th>Driver</th>
+                                <th>Team</th>
+                                <th>Nationality</th>
+                                <th>Code</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>`;
+            }
+
+            // 5. UI Helpers
+            function showLoading() {
+                document.getElementById('table-container').innerHTML = `
+                    <div class="state-box"><div class="spinner"></div><p>Syncing with Pitwall...</p></div>`;
+            }
+
+            function showError(msg) {
+                document.getElementById('table-container').innerHTML = `
+                    <div class="state-box"><div class="state-icon">⚠️</div><p>${msg}</p></div>`;
+            }
+
+            // 6. INITIALIZATION & EVENTS
+            window.onload = () => {
+                const seasonSelect = document.getElementById('season-select');
+                const searchInput = document.getElementById('driver-search');
+
+                if (seasonSelect) {
+                    seasonSelect.addEventListener('change', (e) => {
+                        searchQuery = '';
+                        if(searchInput) searchInput.value = '';
+                        loadDrivers(e.target.value);
+                    });
+                }
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', (e) => {
+                        searchQuery = e.target.value;
+                        renderTable();
+                    });
+                }
+
+                // Default loading to 2025
+                loadDrivers("2025");
+            };
+        </script>
+    </body>
+</html>

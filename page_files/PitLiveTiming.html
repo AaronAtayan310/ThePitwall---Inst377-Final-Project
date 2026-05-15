@@ -1,0 +1,245 @@
+<html>
+    <head>
+        <title>Inst377 - The PitWall - Live Timings</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
+
+        <link rel="stylesheet" href="HomePageCSS.css">
+        <link rel="stylesheet" href="DriverStyle.css" />
+        <link rel="stylesheet" href="TimingsStyle.css" />
+        
+        <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+        
+        <script src="https://unpkg.com/lucide@latest"></script>
+    </head>
+    <body>
+        <nav>
+            <a class="nav-logo" href="PitHome.html">
+                <span class="nav-logo-text">The<span>Pitwall</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="PitHome.html">Home</a></li>
+                <li><a href="PitSchedule.html" class="nav-cta">Schedule</a></li>
+                <li><a href="PitDrivers.html" class="nav-cta">Drivers</a></li>
+                <li><a href="PitLiveTiming.html" class="active-link">Live Timing</a></li>
+                <li><a href="PitTelemetry.html" class="nav-cta">Telemetry</a></li>
+                <li><a href="PitStrat.html" class="nav-cta">Pit Strategy</a></li>
+                <li><a href="PitAbout.html" class="nav-cta">About</a></li>
+            </ul>
+        </nav>
+
+        <section class="drivers-hero">
+            <div class="drivers-hero-bg"></div>
+            <div class="drivers-hero-content">
+                <div class="controls-row">
+                    <div class="control-group">
+                        <div class="page-eyebrow">Lap Timings </div>
+                        <h1 class="page-title">Session Center</h1>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="year-select">Season</label>
+                        <select id="year-select">
+                            <option value="2025" selected>2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="race-select">Grand Prix</label>
+                        <select id="race-select">
+                            <option>Loading Races...</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="lap-select">Lap Number</label>
+                        <select id="lap-select">
+                            <option value="latest">Latest Completed</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="drivers-body">
+            <div id="timing-table"></div>
+        </div>
+
+        <footer>
+            <div class="footer-logo">The<span>Pitwall</span></div>
+            <div class="footer-note">Data via OpenF1 API &mdash; Aaron Atayan</div>
+        </footer>
+
+        <script>
+            let table;
+            let currentSessionKey = null;
+
+            /**
+             * 1. Fetches all races for the selected year
+             */
+            async function loadRaces() {
+                const year = document.getElementById('year-select').value;
+                const raceSelect = document.getElementById('race-select');
+                
+                try {
+                    const res = await fetch(`https://api.openf1.org/v1/meetings?year=${year}`);
+                    const meetings = await res.json();
+                    
+                    raceSelect.innerHTML = meetings.map(m => 
+                        `<option value="${m.meeting_key}">${m.location} - ${m.meeting_name}</option>`
+                    ).join('');
+
+                    // Trigger the session fetch for the first race in the list
+                    loadSession();
+                } catch (err) {
+                    console.error("Error loading races:", err);
+                }
+            }
+
+            /**
+             * 2. Finds the "Race" session key for the selected GP
+             */
+            async function loadSession() {
+                const meetingKey = document.getElementById('race-select').value;
+                
+                try {
+                    // We specifically target "Race" sessions to avoid practice data clutter
+                    const res = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}&session_name=Race`);
+                    const sessions = await res.json();
+                    
+                    if (sessions.length > 0) {
+                        currentSessionKey = sessions[0].session_key;
+                        loadTimingData(currentSessionKey, "latest");
+                    } else {
+                        document.getElementById('timing-table').innerHTML = "<p style='padding:20px;'>No Race session data found for this GP yet.</p>";
+                    }
+                } catch (err) {
+                    console.error("Error loading session:", err);
+                }
+            }
+
+            /**
+             * 3. Fetches Drivers and Laps to build the table
+             */
+            async function loadTimingData(sessionKey, requestedLap = "latest") {
+                try {
+                    // Fetch Drivers and Laps in parallel for speed
+                    const [drvRes, lapRes] = await Promise.all([
+                        fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
+                        fetch(`https://api.openf1.org/v1/laps?session_key=${sessionKey}${requestedLap !== "latest" ? `&lap_number=${requestedLap}` : ''}`)
+                    ]);
+
+                    let drivers = await drvRes.json();
+                    const laps = await lapRes.json();
+
+                    // Filter unique drivers (cleans up testing data)
+                    drivers = drivers.filter((v, i, a) => a.findIndex(t => (t.driver_number === v.driver_number)) === i);
+
+                    // Update lap dropdown if we are looking at the 'latest' dataset
+                    if (requestedLap === "latest") {
+                        updateLapDropdown(laps);
+                    }
+
+                    // Map the data for Tabulator
+                    const tableData = drivers.map(d => {
+                        const dLaps = laps.filter(l => l.driver_number === d.driver_number);
+                        const displayLap = requestedLap === "latest" ? dLaps[dLaps.length - 1] : dLaps[0];
+                        
+                        return {
+                            number: d.driver_number,
+                            name: d.full_name,
+                            team: d.team_name,
+                            team_color: d.team_colour || "444444",
+                            lap_time: displayLap?.lap_duration || 999, // Sorts empty to bottom
+                            s1: displayLap?.duration_sector_1 || 0,
+                            s2: displayLap?.duration_sector_2 || 0,
+                            s3: displayLap?.duration_sector_3 || 0,
+                            acronym: d.name_acronym
+                        };
+                    });
+
+                    renderTable(tableData);
+                } catch (err) {
+                    console.error("Fetch error:", err);
+                }
+            }
+
+            function updateLapDropdown(laps) {
+                const select = document.getElementById('lap-select');
+                if (!laps.length) return;
+                
+                const maxLap = Math.max(...laps.map(l => l.lap_number || 0));
+                select.innerHTML = '<option value="latest">Latest Completed</option>';
+                
+                for (let i = 1; i <= maxLap; i++) {
+                    const opt = document.createElement('option');
+                    opt.value = i;
+                    opt.innerText = `Lap ${i}`;
+                    select.appendChild(opt);
+                }
+            }
+
+            function renderTable(data) {
+                if (table) table.destroy();
+
+                table = new Tabulator("#timing-table", {
+                    data: data,
+                    layout: "fitColumns",
+                    initialSort: [
+                        {column: "lap_time", dir: "asc"} 
+                    ],
+                    columns: [
+                        {title: "DRV", field: "number", width: 70, hozAlign: "center", headerSort: false},
+                        {title: "DRIVER", field: "name", minWidth: 200, formatter: (cell) => {
+                            const d = cell.getData();
+                            return `<div style="border-left: 4px solid #${d.team_color}; padding-left: 10px; font-weight: 600;">
+                                        ${d.name} <span style="color: #666; font-size: 0.8rem;">${d.acronym}</span>
+                                    </div>`;
+                        }},
+                        {title: "TEAM", field: "team", width: 180},
+                        {
+                            title: "LAP TIME", 
+                            field: "lap_time", 
+                            hozAlign: "right", 
+                            cssClass: "font-mono", 
+                            formatter: (cell) => {
+                                const totalSeconds = cell.getValue();
+                                
+                                // Handle empty or TBD laps
+                                if (totalSeconds === 999 || !totalSeconds) return "—";
+
+                                // Calculation for M:SS.ms
+                                const minutes = Math.floor(totalSeconds / 60);
+                                const seconds = (totalSeconds % 60).toFixed(3);
+                                
+                                // Format: "1:43.455" (Standard F1 Style)
+                                // If you strictly want a dot like "1.43.455", change the colon to a dot below
+                                return `${minutes}:${seconds.padStart(6, '0')}`;
+                            }
+                        },
+                        {title: "S1", field: "s1", hozAlign: "center", formatter: c => c.getValue() || "—"},
+                        {title: "S2", field: "s2", hozAlign: "center", formatter: c => c.getValue() || "—"},
+                        {title: "S3", field: "s3", hozAlign: "center", formatter: c => c.getValue() || "—"},
+                    ]
+                });
+            }
+
+            window.onload = () => {
+                document.getElementById('year-select').addEventListener('change', loadRaces);
+                document.getElementById('race-select').addEventListener('change', loadSession);
+                document.getElementById('lap-select').addEventListener('change', (e) => {
+                    loadTimingData(currentSessionKey, e.target.value);
+                });
+
+                // Initial load chain
+                loadRaces();
+                lucide.createIcons();
+            };
+        </script>
+    </body>
+</html>

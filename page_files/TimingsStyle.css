@@ -1,0 +1,40 @@
+#timing-table {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    font-family: 'Barlow', sans-serif;
+}
+
+.controls-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tabulator {
+    border: none !important;
+    background-color: transparent !important;
+}
+
+.tabulator-header {
+    background-color: #111 !important;
+    color: #e10600 !important;
+    font-family: 'Barlow Condensed', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.tyre-badge {
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.75rem;
+    border: 1px solid currentColor;
+}

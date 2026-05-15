@@ -14,12 +14,12 @@
                 <span class="nav-logo-text">The<span>Pitwall</span></span>
             </a>
             <ul class="nav-links">
-                <li><a href="PitHome.html">Home</a></li>
-                <li><a href="#">Schedule</a></li>
-                <li><a href="PitDrivers.html" class="active-link">Drivers</a></li>
-                <li><a href="#">Live Timing</a></li>
-                <li><a href="#">Telemetry</a></li>
-                <li><a href="#">Pit Strategy</a></li>
+                <li><a href="PitHome.html" class="active-link">Home</a></li>
+                <li><a href="PitSchedule.html" class="nav-cta">Schedule</a></li>
+                <li><a href="PitDrivers.html" class="nav-cta">Drivers</a></li>
+                <li><a href="PitLiveTiming.html" class="nav-cta">Live Timing</a></li>
+                <li><a href="PitTelemetry.html" class="nav-cta">Telemetry</a></li>
+                <li><a href="PitStrat.html" class="nav-cta">Pit Strategy</a></li>
                 <li><a href="PitAbout.html" class="nav-cta">About</a></li>
             </ul>
         </nav>
@@ -97,7 +97,7 @@
 
             // 2. Map years to specific session keys
             const sessionMap = {
-                "2025": 9897, 
+                "2025": 9877, 
                 "2024": 9468, 
                 "2023": 9158, 
             };
@@ -110,7 +110,7 @@
                 document.getElementById('main-title').innerText = `${year} Drivers`;
                 document.getElementById('stat-season').innerText = year;
 
-                const sessionKey = sessionMap[year] || 9640;
+                const sessionKey = sessionMap[year] || 9877;
                 const url = `https://api.openf1.org/v1/drivers?session_key=${sessionKey}`;
 
                 try {

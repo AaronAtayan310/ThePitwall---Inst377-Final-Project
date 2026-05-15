@@ -1,0 +1,84 @@
+ .schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    padding: 30px 0;
+}
+
+.race-card {
+    background: #1a1a1a;
+    border-radius: 12px;
+    border-left: 5px solid #e10600;
+    padding: 24px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.race-card:hover {
+    transform: translateY(-8px);
+    background: #222222;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.race-date-badge {
+    color: #e10600;
+    font-family: 'Barlow Condensed';
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.race-name {
+    font-family: 'Barlow Condensed';
+    font-size: 1.5rem;
+    margin: 0 0 10px 0;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+.race-location {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 20px;
+}
+
+.session-list {
+    border-top: 1px solid #333;
+    padding-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.session-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.session-name {
+    font-weight: 400;
+}
+
+.session-time {
+    font-family: 'Barlow';
+    font-weight: 600;
+    color: #fff;
+    background: #333;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+}
+
+.loading-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 50px;
+}

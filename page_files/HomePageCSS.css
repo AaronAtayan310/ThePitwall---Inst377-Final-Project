@@ -157,21 +157,6 @@
       z-index: -1; /* Puts it behind everything */
     }
 
-    /* large faded "F1" watermark */
-    .hero-watermark {
-      position: absolute;
-      right: -2rem;
-      top: 50%;
-      transform: translateY(-60%);
-      font-family: var(--font-display);
-      font-size: clamp(16rem, 30vw, 26rem);
-      line-height: 1;
-      color: rgba(255,255,255,0.028);
-      pointer-events: none;
-      user-select: none;
-      letter-spacing: -0.02em;
-    }
-
     .hero-content {
       position: relative;
       z-index: 2;

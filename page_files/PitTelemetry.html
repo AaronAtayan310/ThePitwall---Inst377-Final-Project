@@ -1,0 +1,243 @@
+<html>
+    <head>
+        <title>Inst377 - The PitWall - Car Telemetry</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;600&family=Barlow+Condensed:wght@700&display=swap" rel="stylesheet" />
+
+        <link rel="stylesheet" href="HomePageCSS.css">
+        <link rel="stylesheet" href="DriverStyle.css" />
+        <link rel="stylesheet" href="TelemetryStyle.css" />
+        
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://unpkg.com/lucide@latest"></script>
+    </head>
+    <body>
+
+        <nav>
+            <a class="nav-logo" href="PitHome.html">
+                <span class="nav-logo-text">The<span>Pitwall</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="PitHome.html">Home</a></li>
+                <li><a href="PitSchedule.html">Schedule</a></li>
+                <li><a href="PitDrivers.html">Drivers</a></li>
+                <li><a href="PitLiveTiming.html">Live Timing</a></li>
+                <li><a href="PitTelemetry.html" class="active-link">Telemetry</a></li>
+                <li><a href="PitStrat.html" class="nav-cta">Pit Strategy</a></li>
+                <li><a href="PitAbout.html" class="nav-cta">About</a></li>
+            </ul>
+        </nav>
+
+        <section class="drivers-hero">
+            <div class="drivers-hero-bg"></div>
+            <div class="drivers-hero-content">
+                <div class="controls-row">
+                    <div class="control-group">
+                        <div class="page-eyebrow">Car Data Analysis</div>
+                        <h1 class="page-title">Live Telemetry</h1>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Season</label>
+                        <select id="year-select">
+                            <option value="2025" selected>2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Grand Prix</label>
+                        <select id="race-select"><option>Loading...</option></select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Driver</label>
+                        <select id="driver-select"><option>Select Race First</option></select>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Lap</label>
+                        <select id="lap-select"><option value="1">Lap 1</option></select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="telemetry-section">
+            <div class="telemetry-grid">
+
+                <!-- Left: Stats Dashboard -->
+                <div class="status-card">
+                    <div class="telemetry-stat">
+                        <span class="stat-label">⚡ Speed</span>
+                        <span class="stat-value" id="stat-speed">— KM/H</span>
+                    </div>
+                    <div class="telemetry-stat">
+                        <span class="stat-label">⚙️ Gear</span>
+                        <span class="stat-value" id="stat-gear">—</span>
+                    </div>
+                    <div class="telemetry-stat">
+                        <span class="stat-label">🔄 RPM</span>
+                        <span class="stat-value" id="stat-rpm">—</span>
+                    </div>
+                    <div class="telemetry-stat">
+                        <span class="stat-label">🟢 DRS</span>
+                        <span class="stat-value" id="stat-drs">—</span>
+                    </div>
+                    <div class="telemetry-stat">
+                        <span class="stat-label">🔴 Brake</span>
+                        <span class="stat-value" id="stat-brake">—</span>
+                    </div>
+                </div>
+
+                <!-- Right: Speed Chart -->
+                <div class="chart-container">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+
+            </div>
+        </section>
+
+        <script>
+            let telemetryChart;
+            let currentSessionKey = null;
+
+            // 1. Initial Load: Get Races for Year
+            async function loadRaces() {
+                const year = document.getElementById('year-select').value;
+                const raceSelect = document.getElementById('race-select');
+                
+                const res = await fetch(`https://api.openf1.org/v1/meetings?year=${year}`);
+                const meetings = await res.json();
+                
+                raceSelect.innerHTML = meetings.map(m => 
+                    `<option value="${m.meeting_key}">${m.location} - ${m.meeting_name}</option>`
+                ).join('');
+
+                loadSessionDependencies();
+            }
+
+            // 2. Load Session, then Laps and Drivers
+            async function loadSessionDependencies() {
+                const meetingKey = document.getElementById('race-select').value;
+                const sRes = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}&session_name=Race`);
+                const sessions = await sRes.json();
+                
+                if (sessions.length > 0) {
+                    currentSessionKey = sessions[0].session_key;
+
+                    const [lapRes, drvRes] = await Promise.all([
+                        fetch(`https://api.openf1.org/v1/laps?session_key=${currentSessionKey}`),
+                        fetch(`https://api.openf1.org/v1/drivers?session_key=${currentSessionKey}`)
+                    ]);
+
+                    const laps = await lapRes.json();
+                    const drivers = await drvRes.json();
+
+                    // Populate Laps
+                    const lapSelect = document.getElementById('lap-select');
+                    const maxLap = Math.max(...laps.map(l => l.lap_number || 0));
+                    lapSelect.innerHTML = Array.from({length: maxLap}, (_, i) => 
+                        `<option value="${i + 1}">Lap ${i + 1}</option>`).join('');
+
+                    // Populate Drivers
+                    document.getElementById('driver-select').innerHTML = drivers
+                        .filter((v, i, a) => a.findIndex(t => (t.driver_number === v.driver_number)) === i)
+                        .map(d => `<option value="${d.driver_number}">${d.full_name}</option>`).join('');
+
+                    loadTelemetry();
+                }
+            }
+
+            //3. Telemetry fetching
+            async function loadTelemetry() {
+                const driverNum = document.getElementById('driver-select').value;
+                const lapNum = document.getElementById('lap-select').value;
+
+                if (!driverNum || !currentSessionKey) return;
+
+                try {
+                    //Get the start and end time of the SPECIFIC lap
+                    const lapTimeRes = await fetch(`https://api.openf1.org/v1/laps?session_key=${currentSessionKey}&driver_number=${driverNum}&lap_number=${lapNum}`);
+                    const lapInfo = await lapTimeRes.json();
+
+                    if (lapInfo.length > 0) {
+                        const startTime = lapInfo[0].date_start;
+                        const endTime = lapInfo[0].date_end;
+
+                        const carUrl = `https://api.openf1.org/v1/car_data?driver_number=${driverNum}&session_key=${currentSessionKey}&date>=${startTime}&date<=${endTime}`;
+                        const carRes = await fetch(carUrl);
+                        const telemetryData = await carRes.json();
+
+                        if (telemetryData.length > 0) {
+                            updateDashboard(telemetryData[telemetryData.length - 1]);
+                            updateChart(telemetryData);
+                        } else {
+                            // FALLBACK: If specific lap date filtering fails, grab the last 100 points for that driver
+                            console.warn("No telemetry in lap window, fetching latest session data...");
+                            const fallbackRes = await fetch(`https://api.openf1.org/v1/car_data?driver_number=${driverNum}&session_key=${currentSessionKey}`);
+                            const fallbackData = await fallbackRes.json();
+                            
+                            if (fallbackData.length > 0) {
+                                const slice = fallbackData.slice(-100);
+                                updateDashboard(slice[slice.length - 1]);
+                                updateChart(slice);
+                            }
+                        }
+                    }
+                } catch (err) {
+                    console.error("Telemetry failed:", err);
+                    // Clear dashboard on error so user isn't looking at old data
+                    document.getElementById('stat-speed').innerText = "DATA ERROR";
+                }
+            }
+
+            function updateDashboard(point) {
+                document.getElementById('stat-speed').innerText = `${point.speed} KM/H`;
+                document.getElementById('stat-gear').innerText = point.n_gear;
+                document.getElementById('stat-rpm').innerText = point.rpm;
+                document.getElementById('stat-drs').innerText = point.drs >= 10 ? 'ACTIVE' : 'OFF';
+                document.getElementById('stat-drs').className = point.drs >= 10 ? 'stat-value drs-active' : 'stat-value drs-inactive';
+                document.getElementById('stat-brake').innerText = point.brake > 0 ? 'ON' : 'OFF';
+            }
+
+            function updateChart(data) {
+                const ctx = document.getElementById('telemetryChart').getContext('2d');
+                if (telemetryChart) telemetryChart.destroy();
+
+                telemetryChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.map((_, i) => i),
+                        datasets: [{
+                            label: 'Speed',
+                            data: data.map(d => d.speed),
+                            borderColor: '#e10600',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { x: { display: false }, y: { grid: { color: '#333' } } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            }
+
+            window.onload = () => {
+                document.getElementById('year-select').addEventListener('change', loadRaces);
+                document.getElementById('race-select').addEventListener('change', loadSessionDependencies);
+                document.getElementById('driver-select').addEventListener('change', loadTelemetry);
+                document.getElementById('lap-select').addEventListener('change', loadTelemetry);
+                loadRaces();
+            };
+        </script>
+        
+    </body>
+</html>

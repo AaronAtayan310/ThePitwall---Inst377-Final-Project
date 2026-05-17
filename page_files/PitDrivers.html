@@ -91,18 +91,17 @@
         </footer>
 
         <script>
-            // 1. Setup global data storage
+            // Setup global data storage
             let allDrivers = [];
             let searchQuery = '';
 
-            // 2. Map years to specific session keys
+            // Map years to specific session keys
             const sessionMap = {
                 "2025": 9877, 
                 "2024": 9468, 
                 "2023": 9158, 
             };
 
-            // 3. The Fetch Function
             async function loadDrivers(year) {
                 showLoading();
                 
@@ -144,7 +143,6 @@
                 }
             }
 
-            // 4. The Render Function
             function renderTable() {
                 const container = document.getElementById('table-container');
                 
@@ -194,7 +192,6 @@
                     </table>`;
             }
 
-            // 5. UI Helpers
             function showLoading() {
                 document.getElementById('table-container').innerHTML = `
                     <div class="state-box"><div class="spinner"></div><p>Syncing with Pitwall...</p></div>`;
@@ -205,7 +202,25 @@
                     <div class="state-box"><div class="state-icon">⚠️</div><p>${msg}</p></div>`;
             }
 
-            // 6. INITIALIZATION & EVENTS
+            async function favoriteDriver(number, name, team) {
+                await fetch('http://localhost:3000/api/favorites', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ driver_number: number, driver_name: name, team_name: team })
+                });
+                alert(`${name} saved to your Supabase PitWall dashboard!`);
+                loadFavoritesDashboard(); // Refresh UI layout
+            }
+
+            // Front-End GET Trigger Example (Reading from your DB via Endpoint 3)
+            async function loadFavoritesDashboard() {
+                const res = await fetch('http://localhost:3000/api/favorites');
+                const favorites = await res.json();
+                
+                // Render these favorites into a neat panel on your Home or Driver page!
+                console.log("Your Supabase Saved Drivers Data Array:", favorites);
+            }
+
             window.onload = () => {
                 const seasonSelect = document.getElementById('season-select');
                 const searchInput = document.getElementById('driver-search');

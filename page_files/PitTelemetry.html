@@ -110,7 +110,7 @@
                 const year = document.getElementById('year-select').value;
                 const raceSelect = document.getElementById('race-select');
                 
-                const res = await fetch(`https://api.openf1.org/v1/meetings?year=${year}`);
+                const res = await fetch(`http://localhost:3000/api/openf1/meetings?year=${year}`);
                 const meetings = await res.json();
                 
                 raceSelect.innerHTML = meetings.map(m => 

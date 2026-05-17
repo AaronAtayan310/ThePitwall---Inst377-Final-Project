@@ -1,0 +1,237 @@
+<html>
+    <head>
+        <title>Inst377 - The PitWall - Pit Strategy</title>
+
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,300;0,400;0,600;1,300&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet" />
+
+        <link rel="stylesheet" href="HomePageCSS.css">
+        <link rel="stylesheet" href="DriverStyle.css" />
+        <link rel="stylesheet" href="StratStyle.css" />
+        
+        <link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+        <script type="text/javascript" src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+        
+        <script src="https://unpkg.com/lucide@latest"></script>
+    </head>
+    <body>
+
+        <nav>
+            <a class="nav-logo" href="PitHome.html">
+                <span class="nav-logo-text">The<span>Pitwall</span></span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="PitHome.html">Home</a></li>
+                <li><a href="PitSchedule.html" class="nav-cta">Schedule</a></li>
+                <li><a href="PitDrivers.html" class="nav-cta">Drivers</a></li>
+                <li><a href="PitLiveTiming.html" class="nav-cta">Live Timing</a></li>
+                <li><a href="PitTelemetry.html" class="nav-cta">Telemetry</a></li>
+                <li><a href="PitStrat.html" class="active-link">Pit Strategy</a></li>
+                <li><a href="PitAbout.html" class="nav-cta">About</a></li>
+            </ul>
+        </nav>
+
+        <section class="drivers-hero">
+            <div class="drivers-hero-bg"></div>
+            <div class="drivers-hero-content">
+                <div class="controls-row">
+                    <div class="control-group">
+                        <div class="page-eyebrow">Race Management</div>
+                        <h1 class="page-title">Pit Strategy</h1>
+                    </div>
+                    
+                    <div class="control-group">
+                        <label for="year-select">Season</label>
+                        <select id="year-select">
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023" selected>2023</option>
+                        </select>
+                    </div>
+
+                    <div class="control-group">
+                        <label for="race-select">Grand Prix</label>
+                        <select id="race-select">
+                            <option>Loading Races...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="drivers-body">
+            <div id="strategy-table"></div>
+        </div>
+
+        <footer>
+            <div class="footer-logo">The<span>Pitwall</span></div>
+            <div class="footer-note">Data via OpenF1 API &mdash; Aaron Atayan</div>
+        </footer>
+
+        <script>
+            let table;
+            let currentSessionKey = null;
+
+            /**
+             * 1. Fetch all races/meetings for the selected year
+             */
+            async function loadRaces() {
+                const year = document.getElementById('year-select').value;
+                const raceSelect = document.getElementById('race-select');
+                
+                try {
+                    const res = await fetch(`https://api.openf1.org/v1/meetings?year=${year}`);
+                    const meetings = await res.json();
+                    
+                    raceSelect.innerHTML = meetings.map(m => 
+                        `<option value="${m.meeting_key}">${m.location} - ${m.meeting_name}</option>`
+                    ).join('');
+
+                    loadSessionAndStrategy();
+                } catch (err) {
+                    console.error("Error loading races:", err);
+                }
+            }
+
+            /**
+             * 2. Find the main 'Race' session key for the selected GP
+             */
+            async function loadSessionAndStrategy() {
+                const meetingKey = document.getElementById('race-select').value;
+                if (!meetingKey) return;
+
+                try {
+                    const res = await fetch(`https://api.openf1.org/v1/sessions?meeting_key=${meetingKey}&session_name=Race`);
+                    const sessions = await res.json();
+                    
+                    if (sessions.length > 0) {
+                        currentSessionKey = sessions[0].session_key;
+                        loadStrategyData(currentSessionKey);
+                    } else {
+                        document.getElementById('strategy-table').innerHTML = "<p style='padding:20px; color:#aaa;'>No Race strategy data recorded for this weekend yet.</p>";
+                    }
+                } catch (err) {
+                    console.error("Error loading session:", err);
+                }
+            }
+
+            /**
+             * 3. Concurrent multi-endpoint fetch (/stints, /pit, /drivers)
+             */
+            async function loadStrategyData(sessionKey) {
+                try {
+                    const [drvRes, stintRes, pitRes] = await Promise.all([
+                        fetch(`https://api.openf1.org/v1/drivers?session_key=${sessionKey}`),
+                        fetch(`https://api.openf1.org/v1/stints?session_key=${sessionKey}`),
+                        fetch(`https://api.openf1.org/v1/pit?session_key=${sessionKey}`)
+                    ]);
+
+                    let drivers = await drvRes.json();
+                    const stints = await stintRes.json();
+                    const pits = await pitRes.json();
+
+                    drivers = drivers.filter((v, i, a) => a.findIndex(t => (t.driver_number === v.driver_number)) === i);
+
+                    const aggregatedData = drivers.map(d => {
+                        const driverStints = stints.filter(s => s.driver_number === d.driver_number)
+                                                   .sort((a, b) => a.stint_number - b.stint_number);
+                        
+                        const driverPits = pits.filter(p => p.driver_number === d.driver_number)
+                                               .sort((a, b) => a.lap_number - b.lap_number);
+
+                        const currentStint = driverStints[driverStints.length - 1];
+                        
+                        const compoundHistory = driverStints.map(s => ({
+                            compound: s.compound || "UNKNOWN",
+                            age: s.tyre_age_at_start || 0
+                        }));
+
+                        const totalStops = driverPits.length;
+                        const totalPitTime = driverPits.reduce((acc, curr) => acc + (curr.pit_duration || 0), 0);
+
+                        return {
+                            number: d.driver_number,
+                            name: d.full_name,
+                            team: d.team_name,
+                            team_color: d.team_colour || "444444",
+                            acronym: d.name_acronym,
+                            stops: totalStops,
+                            current_compound: currentStint?.compound || "—",
+                            current_tyre_age: currentStint?.tyre_age_at_start !== undefined ? currentStint.tyre_age_at_start : "—",
+                            history: compoundHistory,
+                            pit_lost_time: totalPitTime > 0 ? totalPitTime.toFixed(2) : "—"
+                        };
+                    });
+
+                    renderTable(aggregatedData);
+                } catch (err) {
+                    console.error("Strategy Engine Aggregation failed:", err);
+                }
+            }
+
+            function getTyreStyleClass(compound) {
+                const cmp = compound.toLowerCase();
+                if (cmp.includes('soft')) return 'tyre-soft';
+                if (cmp.includes('medium')) return 'tyre-medium';
+                if (cmp.includes('hard')) return 'tyre-hard';
+                if (cmp.includes('inter')) return 'tyre-intermediate';
+                if (cmp.includes('wet')) return 'tyre-wet';
+                return 'tyre-unknown';
+            }
+
+            /**
+             * 4. Build Tabulator Layout
+             */
+            function renderTable(data) {
+                if (table) table.destroy();
+
+                table = new Tabulator("#strategy-table", {
+                    data: data,
+                    layout: "fitColumns",
+                    initialSort: [
+                        {column: "stops", dir: "asc"}
+                    ],
+                    columns: [
+                        {title: "DRV", field: "number", width: 70, hozAlign: "center", headerSort: false},
+                        {title: "DRIVER", field: "name", minWidth: 200, formatter: (cell) => {
+                            const d = cell.getData();
+                            return `<div style="border-left: 4px solid #${d.team_color}; padding-left: 10px; font-weight: 600;">
+                                        ${d.name} <span style="color: #666; font-size: 0.8rem;">${d.acronym}</span>
+                                    </div>`;
+                        }},
+                        {title: "TEAM", field: "team", width: 180},
+                        {title: "STOPS", field: "stops", width: 90, hozAlign: "center", cssClass: "font-mono"},
+                        {title: "ACTIVE COMP", field: "current_compound", width: 140, formatter: (cell) => {
+                            const val = cell.getValue();
+                            if (val === "—") return "—";
+                            return `<span class="tyre-badge ${getTyreStyleClass(val)}">${val}</span>`;
+                        }},
+                        {title: "TYRE AGE (LAPS)", field: "current_tyre_age", width: 150, hozAlign: "center", cssClass: "font-mono"},
+                        {title: "TYRE STRATEGY PLAN / STINT HISTORY", field: "history", formatter: (cell) => {
+                            const historyArray = cell.getValue();
+                            if (!historyArray || historyArray.length === 0) return "—";
+                            
+                            return historyArray.map((st, index) => {
+                                const classMod = getTyreStyleClass(st.compound);
+                                return `<span class="tyre-badge ${classMod}" title="Started with ${st.age} lap wear">${index + 1}: ${st.compound}</span>`;
+                            }).join(' <i data-lucide="chevron-right" style="display:inline-block; width:12px; height:12px; vertical-align:middle; color:#666;"></i> ');
+                        }},
+                        {title: "PITTIME LOST (S)", field: "pit_lost_time", width: 150, hozAlign: "right", cssClass: "font-mono"}
+                    ],
+                    renderComplete: function() {
+                        lucide.createIcons();
+                    }
+                });
+            }
+
+            window.onload = () => {
+                document.getElementById('year-select').addEventListener('change', loadRaces);
+                document.getElementById('race-select').addEventListener('change', loadSessionAndStrategy);
+                
+                loadRaces();
+                lucide.createIcons();
+            };
+        </script>
+    </body>
+</html>
